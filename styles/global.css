@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.LargeTextSize {
+  font-size: clamp(2rem, 10vw, 7rem);
+  text-transform: uppercase;
+}
+.SmallTextSize {
+  font-size: clamp(0.5rem, 5vw, 2rem);
+  color: rgb(11, 11, 185);
+}
+.chatUI {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(100vh - 8.5rem);
+}
+.chatUI::-webkit-scrollbar {
+  display: none;
+}

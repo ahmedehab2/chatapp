@@ -1,5 +1,4 @@
 import React, { use, useState } from "react";
-
 import {
   arrayUnion,
   collection,
@@ -17,7 +16,9 @@ import { ImSpinner2 } from "react-icons/im";
 import { FaUserFriends } from "react-icons/fa";
 import { db } from "firebaseConfig";
 import { useAuthContext } from "context/AuthContext";
+import { useChatContext } from "context/ChatContext";
 import { toast } from "react-hot-toast";
+import { useRouter } from "next/router";
 
 const Search = () => {
   const [userName, setUserName] = useState("");
@@ -25,6 +26,10 @@ const Search = () => {
   const [users, setUsers] = useState(null);
   const [addingFriend, setAddingFriend] = useState(false);
   const { currentUser } = useAuthContext();
+  const { state, dispatch } = useChatContext();
+  const { user } = state;
+  const router = useRouter();
+
   const fetcher = async () => {
     const q = query(
       collection(db, "users"),
@@ -39,7 +44,7 @@ const Search = () => {
 
   const handleChange = (e) => {
     setUserName(e.target.value);
-    if (userName.length <= 1) {
+    if (userName.length <= 1 && users != null) {
       setUsers(null);
     }
   };
@@ -100,6 +105,15 @@ const Search = () => {
       toast.error("Something went wrong, try again");
     }
   };
+  const handleSelect = (friend) => {
+    const chatId =
+      currentUser.uid > friend.uid
+        ? currentUser.uid + friend.uid
+        : friend.uid + currentUser.uid;
+
+    router.push(`/Chats/${chatId}`);
+    dispatch({ type: "CHANGE_USER", payload: friend });
+  };
 
   return (
     <>
@@ -138,48 +152,54 @@ const Search = () => {
         </div>
       ) : users?.length > 0 ? (
         <>
-          {users.map((doc) => (
-            <div
-              key={doc.uid}
-              className="flex space-x-4 m-2 rounded-2xl p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 cursor-pointer"
-            >
-              <img
-                className="rounded-full h-10 w-10"
-                src={doc.pictureURL}
-                alt="avatar"
-              />
-              <div className="flex-1 py-1">
-                <div className="h-2 text-gray-600 dark:text-white rounded">
-                  {doc.name}
+          {users.map((user) => {
+            const isFriend = user.friends.includes(currentUser.uid);
+            return (
+              <div
+                onClick={() => {
+                  isFriend && handleSelect(user);
+                }}
+                key={user.uid}
+                className="flex space-x-4 m-2 rounded-2xl p-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 cursor-pointer"
+              >
+                <img
+                  className="rounded-full h-10 w-10"
+                  src={user.pictureURL}
+                  alt="avatar"
+                />
+                <div className="flex-1 py-1">
+                  <div className="h-2 text-gray-600 dark:text-white rounded">
+                    {user.name}
+                  </div>
                 </div>
+                {addingFriend ? (
+                  <div className="rounded-full w-10 flex items-center justify-center">
+                    <ImSpinner2
+                      fill="blue"
+                      size={25}
+                      className="hover:fill-blue-500 animate-spin"
+                    />
+                  </div>
+                ) : isFriend ? (
+                  <div className="rounded-full w-10 flex items-center justify-center">
+                    <FaUserFriends
+                      fill="blue"
+                      className="hover:fill-blue-500"
+                      size={25}
+                      title="friend"
+                    />
+                  </div>
+                ) : (
+                  <button
+                    className="rounded-full w-10 flex items-center justify-center"
+                    onClick={() => addFriend(user)}
+                  >
+                    <MdPersonAdd fill="blue" size={25} title="Add friend" />
+                  </button>
+                )}
               </div>
-              {addingFriend ? (
-                <div className="rounded-full w-10 flex items-center justify-center">
-                  <ImSpinner2
-                    fill="blue"
-                    size={25}
-                    className="hover:fill-blue-500 animate-spin"
-                  />
-                </div>
-              ) : doc.friends.includes(currentUser.uid) ? (
-                <div className="rounded-full w-10 flex items-center justify-center">
-                  <FaUserFriends
-                    fill="blue"
-                    className="hover:fill-blue-500"
-                    size={25}
-                    title="friend"
-                  />
-                </div>
-              ) : (
-                <button
-                  className="rounded-full w-10 flex items-center justify-center"
-                  onClick={() => addFriend(doc)}
-                >
-                  <MdPersonAdd fill="blue" size={25} title="Add friend" />
-                </button>
-              )}
-            </div>
-          ))}
+            );
+          })}
           <hr className="border border-gray-600 m-2" />
         </>
       ) : (

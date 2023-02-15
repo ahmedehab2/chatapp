@@ -6,8 +6,15 @@ import React, { useEffect, useRef } from "react";
 const Messages = ({ messages }) => {
   const scrollRef = useRef();
 
+  const Scroll = () => {
+    const { offsetHeight, scrollHeight, scrollTop } = scrollRef.current;
+    if (scrollHeight <= scrollTop + offsetHeight + 100) {
+      scrollRef.current?.scrollTo(0, scrollHeight);
+    }
+  };
+
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    Scroll();
   }, [messages]);
 
   const { currentUser } = useAuthContext();
@@ -15,7 +22,10 @@ const Messages = ({ messages }) => {
   const { user } = state;
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-800 flex flex-col p-2 flex-grow chatUI">
+    <div
+      ref={scrollRef}
+      className="bg-gray-100 dark:bg-gray-800 flex flex-col p-2 flex-grow chatUI"
+    >
       <div className="grid-cols-12">
         {messages.map((message) =>
           message.senderID === currentUser?.uid ? (
@@ -63,7 +73,6 @@ const Messages = ({ messages }) => {
             </div>
           )
         )}
-        <div ref={scrollRef}></div>
       </div>
     </div>
   );

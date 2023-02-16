@@ -34,6 +34,7 @@ const BottomChatBar = () => {
   };
 
   const submitMessage = async () => {
+    setMessage("");
     if (!isEmpty(message)) {
       try {
         await updateDoc(doc(db, "chats", chatID), {
@@ -58,8 +59,6 @@ const BottomChatBar = () => {
           },
           [chatID + ".date"]: serverTimestamp(),
         });
-
-        setMessage("");
       } catch {
         toast.error("Message not sent, try again");
       }

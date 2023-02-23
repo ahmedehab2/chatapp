@@ -73,8 +73,8 @@ export const AuthContext = ({ children }) => {
 
   const signout = () => {
     auth.signOut().then(() => {
+      router.replace("/");
       nookies.set(undefined, "token", "", { path: "/" });
-      router.push("/");
       setCurrentUser(null);
     });
   };

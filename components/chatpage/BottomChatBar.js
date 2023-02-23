@@ -77,7 +77,7 @@ const BottomChatBar = () => {
       />
       <button
         onClick={submitMessage}
-        className="w-10 h-10 rounded-full p-1 hover:bg-gray-200 flex justify-center items-center"
+        className="w-10 h-10 rounded-full p-1 hover:bg-gray-200 dark:hover:bg-gray-700 flex justify-center items-center"
       >
         <IoIosSend size={30} fill="blue" />
       </button>
